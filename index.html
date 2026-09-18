@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সুন্দরগঞ্জ মডেল সরকারি প্রাথমিক বিদ্যালয় - ডিজিটাল হাজিরা</title>
+    <!-- Google Fonts (Hind Siliguri) -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 for Polished Popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Supabase JS v2 Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --secondary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-body: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header Navigation */
+        .header {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
+        }
+
+        /* Container */
+        .main-content {
+            max-width: 850px;
+            width: 100%;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        /* Dynamic Views */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.25rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-secondary { background-color: #64748b; color: white; }
+        .btn-secondary:hover { background-color: #475569; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-block { width: 100%; }
+
+        /* Grid Lists */
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .class-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .class-card:hover {
+            border-color: var(--primary);
+            background: #ecfdf5;
+            transform: translateY(-3px);
+        }
+
+        .class-card h3 {
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Card-based Attendance Interface */
+        .attendance-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+
+        .roll-badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 1.15rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+        }
+
+        .attendance-btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .btn-attendance {
+            padding: 1.25rem;
+            font-size: 1.3rem;
+            border-radius: 14px;
+            font-weight: 700;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar-fill {
+            background: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .custom-table th {
+            background-color: #f8fafc;
+            font-weight: 700;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .badge-yes { background: #d1fae5; color: #065f46; }
+        .badge-no { background: #fee2e2; color: #991b1b; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            padding: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- App Header -->
+    <header class="header">
+        <div class="header-title">
+            <i class="fa-solid fa-school"></i>
+            <span>সুন্দরগঞ্জ মডেল সরকারি প্রাথমিক বিদ্যালয়</span>
+        </div>
+        <div class="header-btns" id="headerBtns" style="display: none;">
+            <button class="icon-btn" id="btnPlus" title="শ্রেণী/শিক্ষার্থী ব্যবস্থাপনা" onclick="openManagerModal()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <button class="icon-btn" title="লগআউট" onclick="handleLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-content">
+
+        <!-- 1. LOGIN VIEW -->
+        <div id="viewLogin" class="view-panel active">
+            <div class="card" style="max-width: 420px; margin: 3rem auto;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="background: #ecfdf5; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fa-solid fa-user-check" style="font-size: 2rem; color: var(--primary);"></i>
+                    </div>
+                    <h2>লগইন প্যানেল</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">সিস্টেমে প্রবেশ করতে আপনার পিন লিখুন</p>
+                </div>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">শিক্ষকের নাম</label>
+                        <input type="text" id="loginName" class="form-control" placeholder="যেমন: আব্দুল করিম" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">৫-ডিজিটের পিন (PIN)</label>
+                        <input type="password" id="loginPin" class="form-control" maxlength="5" pattern="\d{5}" placeholder="*****" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-right-to-bracket"></i> প্রবেশ করুন
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. TEACHER DASHBOARD VIEW -->
+        <div id="viewTeacher" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fa-solid fa-chalkboard-user"></i> শিক্ষক ড্যাশবোর্ড</span>
+                    <span id="teacherBadge" style="font-weight: 600; color: var(--primary-dark);"></span>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1.25rem;">আজকের হাজিরা নিতে নিচের যেকোনো শ্রেণী বেছে নিন:</p>
+
+                <div id="teacherClassGrid" class="class-grid">
+                    <!-- Classes dynamically rendered here -->
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button class="btn btn-secondary btn-block" onclick="switchView('viewMonthlyReport')">
+                    <i class="fa-solid fa-chart-line"></i> মাসিক রিপোর্ট
+                </button>
+                <button class="btn btn-secondary btn-block" onclick="switchView('viewSearchStudent')">
+                    <i class="fa-solid fa-magnifying-glass"></i> শিক্ষার্থী সার্চ
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. HEAD TEACHER VIEW -->
+        <div id="viewHeadTeacher" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fa-solid fa-user-shield"></i> প্রধান শিক্ষক মনিটরিং প্যানেল</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <label class="form-label">তারিখ ফিল্টার:</label>
+                        <input type="date" id="htFilterDate" class="form-control" onchange="loadHeadTeacherReport()">
+                    </div>
+                    <div>
+                        <label class="form-label">শ্রেণী ফিল্টার:</label>
+                        <select id="htFilterClass" class="form-control" onchange="loadHeadTeacherReport()">
+                            <option value="">সকল শ্রেণী</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="htReportContainer"></div>
+            </div>
+        </div>
+
+        <!-- 4. CARD-BASED ATTENDANCE VIEW -->
+        <div id="viewAttendance" class="view-panel">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <button class="btn btn-secondary" onclick="switchView('viewTeacher')" style="padding: 6px 14px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-arrow-left"></i> ব্যাক
+                    </button>
+                    <span id="attClassTitle" style="font-weight: 700; font-size: 1.1rem; color: var(--primary);"></span>
+                    <span id="attCounter" style="font-weight: 700; color: var(--text-muted);">০ / ০</span>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div id="progressBarFill" class="progress-bar-fill"></div>
+                </div>
+
+                <div id="attendanceCardBox" class="attendance-card">
+                    <div class="roll-badge">রোল নম্বর: <span id="cardRoll">--</span></div>
+                    <div id="cardName" class="student-name">শিক্ষার্থীর নাম</div>
+
+                    <div class="attendance-btn-group">
+                        <button class="btn btn-success btn-attendance" onclick="recordAttendance('Yes')">
+                            <i class="fa-solid fa-check-circle"></i> Yes (উপস্থিত)
+                        </button>
+                        <button class="btn btn-danger btn-attendance" onclick="recordAttendance('No')">
+                            <i class="fa-solid fa-times-circle"></i> No (অনুপস্থিত)
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+                        <button class="btn btn-secondary" onclick="navigateCard(-1)" style="font-size: 0.85rem;">
+                            <i class="fa-solid fa-chevron-left"></i> পূর্ববর্তী
+                        </button>
+                        <button class="btn btn-secondary" onclick="navigateCard(1)" style="font-size: 0.85rem;">
+                            পরবর্তী <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Done State Summary -->
+                <div id="attendanceDoneBox" style="display: none; text-align: center; padding: 2.5rem 0;">
+                    <div style="background: #d1fae5; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: var(--success);"></i>
+                    </div>
+                    <h2 style="margin-bottom: 0.5rem;">আজকের হাজিরা সম্পন্ন হয়েছে!</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">সব তথ্য সফলভাবে ডাটাবেসে সেভ করা হয়েছে।</p>
+                    <button class="btn btn-primary" onclick="switchView('viewTeacher')">
+                        ড্যাশবোর্ডে ফিরে যান
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MONTHLY REPORT VIEW -->
+        <div id="viewMonthlyReport" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-secondary" onclick="switchView('viewTeacher')" style="padding: 6px 14px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-arrow-left"></i> ব্যাক
+                    </button>
+                    <span class="card-title">১ মাসের হাজিরা রিপোর্ট</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">শ্রেণী নির্বাচন করুন:</label>
+                    <select id="monthlyClassSelect" class="form-control" onchange="fetchMonthlyReport()">
+                        <option value="">নির্বাচন করুন...</option>
+                    </select>
+                </div>
+                <div id="monthlyReportOutput"></div>
+            </div>
+        </div>
+
+        <!-- 6. STUDENT SEARCH VIEW -->
+        <div id="viewSearchStudent" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-secondary" onclick="switchView('viewTeacher')" style="padding: 6px 14px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-arrow-left"></i> ব্যাক
+                    </button>
+                    <span class="card-title">শিক্ষার্থী সার্চ</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">শ্রেণী:</label>
+                        <select id="searchClassSelect" class="form-control">
+                            <option value="">নির্বাচন করুন</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">রোল নম্বর:</label>
+                        <input type="number" id="searchRollInput" class="form-control" placeholder="যেমন: ১">
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="executeStudentSearch()">
+                    <i class="fa-solid fa-search"></i> সার্চ
+                </button>
+
+                <div id="searchResultsOutput" style="margin-top: 1.5rem;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL: Class & Student Management -->
+    <div id="managerModal" class="modal-overlay">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 id="modalHeadTitle">শ্রেণী ও শিক্ষার্থী ব্যবস্থাপনা</h3>
+                <button style="border: none; background: none; font-size: 1.5rem; cursor: pointer;" onclick="closeManagerModal()">&times;</button>
+            </div>
+
+            <!-- Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 1.25rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="setModalTab('class')">শ্রেণী তৈরি</button>
+                <button class="btn btn-secondary" style="flex:1;" onclick="setModalTab('student')">শিক্ষার্থী ভর্তি</button>
+            </div>
+
+            <!-- Tab 1: Class -->
+            <div id="tabAddClass">
+                <form onsubmit="handleCreateClass(event)">
+                    <div class="form-group">
+                        <label class="form-label">শ্রেণীর নাম</label>
+                        <input type="text" id="newClassName" class="form-control" placeholder="যেমন: প্রথম / দ্বিতীয়" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">সেকশন / শাখা</label>
+                        <input type="text" id="newSectionName" class="form-control" placeholder="যেমন: ক / খ" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">শ্রেণী সেভ করুন</button>
+                </form>
+            </div>
+
+            <!-- Tab 2: Student -->
+            <div id="tabAddStudent" style="display: none;">
+                <form onsubmit="handleCreateStudent(event)">
+                    <div class="form-group">
+                        <label class="form-label">শ্রেণী বাছাই করুন</label>
+                        <select id="modalStudentClassSelect" class="form-control" onchange="renderModalStudentList()" required>
+                            <option value="">শ্রেণী বেছে নিন</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">রোল নম্বর</label>
+                        <input type="number" id="newStudentRoll" class="form-control" placeholder="যেমন: ১" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">শিক্ষার্থীর নাম</label>
+                        <input type="text" id="newStudentName" class="form-control" placeholder="যেমন: মোঃ সাকিব হাসান" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">শিক্ষার্থী যুক্ত করুন</button>
+                </form>
+
+                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e2e8f0;">
+                <h4 style="margin-bottom: 0.5rem;">নিবন্ধিত শিক্ষার্থীদের তালিকা:</h4>
+                <div id="modalStudentList" style="max-height: 180px; overflow-y: auto;"></div>
+                
+                <button class="btn btn-success btn-block" style="margin-top: 1rem;" onclick="closeManagerModal()">
+                    <i class="fa-solid fa-check"></i> Done (সম্পন্ন)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- SUPABASE CONFIGURATION ---
+        const SUPABASE_URL = "https://irndbgyyvgktljgtqobv.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlybmRiZ3l5dmdrdGxqZ3Rxb2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3Mjg4MjUsImV4cCI6MjEwNTMwNDgyNX0.WUFTF6YEBM_P9OUZVbVUckmpevACg5i2itiNH3Per5c";
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // App States
+        let currentUser = null;
+        let globalClasses = [];
+        let activeAttendanceClass = null;
+        let activeStudents = [];
+        let currentStudentIdx = 0;
+
+        // Toast Helper
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('htFilterDate').value = todayStr;
+        });
+
+        // View Router
+        function switchView(viewId) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            if (viewId === 'viewTeacher') loadTeacherDashboard();
+            if (viewId === 'viewHeadTeacher') loadHeadTeacherDashboard();
+        }
+
+        // Authentication Handler
+        async function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('loginName').value.trim();
+            const pin = document.getElementById('loginPin').value.trim();
+
+            if (!name || pin.length !== 5) {
+                Swal.fire('ভুল তথ্য', 'দয়া করে নাম এবং ৫-ডিজিটের পিন প্রদান করুন।', 'warning');
+                return;
+            }
+
+            Swal.showLoading();
+
+            try {
+                // Fetch User
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('name', name);
+
+                if (error) throw error;
+
+                if (users && users.length > 0) {
+                    const user = users[0];
+                    if (user.password_pin === pin) {
+                        currentUser = user;
+                        Swal.close();
+                        Toast.fire({ icon: 'success', title: 'লগইন সফল হয়েছে!' });
+                        onLoginSuccess();
+                    } else {
+                        Swal.fire('পিন ভুল!', 'সঠিক ৫-ডিজিটের পিন দিন।', 'error');
+                    }
+                } else {
+                    // Auto Register
+                    const { data: newUser, error: regError } = await supabase
+                        .from('users')
+                        .insert([{ name: name, password_pin: pin, role: 'teacher' }])
+                        .select()
+                        .single();
+
+                    if (regError) throw regError;
+
+                    currentUser = newUser;
+                    Swal.close();
+                    Swal.fire('নতুন শিক্ষক রেজিস্টার্ড!', 'আপনার অ্যাকাউন্টটি তৈরি করা হয়েছে।', 'success');
+                    onLoginSuccess();
+                }
+            } catch (err) {
+                Swal.fire('এরর', 'লগইনে সমস্যা হয়েছে: ' + err.message, 'error');
+            }
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('headerBtns').style.display = 'flex';
+            if (currentUser.role === 'head_teacher') {
+                document.getElementById('btnPlus').style.display = 'none';
+                switchView('viewHeadTeacher');
+            } else {
+                document.getElementById('btnPlus').style.display = 'flex';
+                document.getElementById('teacherBadge').innerText = `শিক্ষক: ${currentUser.name}`;
+                switchView('viewTeacher');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('headerBtns').style.display = 'none';
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginPin').value = '';
+            switchView('viewLogin');
+            Toast.fire({ icon: 'info', title: 'লগআউট করা হয়েছে' });
+        }
+
+        // Dashboard & Classes
+        async function loadTeacherDashboard() {
+            try {
+                const { data: classes, error } = await supabase
+                    .from('classes')
+                    .select('*')
+                    .order('class_name', { ascending: true });
+
+                if (error) throw error;
+                globalClasses = classes || [];
+
+                populateDropdowns();
+
+                const grid = document.getElementById('teacherClassGrid');
+                grid.innerHTML = '';
+
+                if (globalClasses.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">কোনো শ্রেণী তৈরি করা হয়নি। প্লাস (+) বোতামে ক্লিক করে নতুন শ্রেণী যোগ করুন।</p>';
+                    return;
+                }
+
+                globalClasses.forEach(cls => {
+                    const card = document.createElement('div');
+                    card.className = 'class-card';
+                    card.innerHTML = `
+                        <h3>${cls.class_name}</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">শাখা: ${cls.section_name}</p>
+                        <button class="btn btn-primary" style="margin-top: 10px; padding: 6px 12px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-clipboard-user"></i> হাজিরা দিন
+                        </button>
+                    `;
+                    card.onclick = () => initAttendanceSession(cls);
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function populateDropdowns() {
+            const dropdownIds = ['modalStudentClassSelect', 'monthlyClassSelect', 'searchClassSelect', 'htFilterClass'];
+            dropdownIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const val = el.value;
+                el.innerHTML = id === 'htFilterClass' ? '<option value="">সকল শ্রেণী</option>' : '<option value="">শ্রেণী নির্বাচন করুন...</option>';
+                globalClasses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = `${c.class_name} (${c.section_name})`;
+                    el.appendChild(opt);
+                });
+                el.value = val;
+            });
+        }
+
+        // Attendance Card System
+        async function initAttendanceSession(cls) {
+            activeAttendanceClass = cls;
+            document.getElementById('attClassTitle').innerText = `${cls.class_name} (${cls.section_name})`;
+
+            Swal.showLoading();
+
+            try {
+                const { data: students, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('class_id', cls.id)
+                    .order('roll_number', { ascending: true });
+
+                if (error) throw error;
+                Swal.close();
+
+                if (!students || students.length === 0) {
+                    Swal.fire('তথ্য পাওয়া যায়নি', 'এই শ্রেণীতে কোনো শিক্ষার্থী নেই! আগে শিক্ষার্থী যোগ করুন।', 'info');
+                    return;
+                }
+
+                activeStudents = students;
+                currentStudentIdx = 0;
+
+                document.getElementById('attendanceCardBox').style.display = 'block';
+                document.getElementById('attendanceDoneBox').style.display = 'none';
+
+                switchView('viewAttendance');
+                renderStudentCard();
+            } catch (err) {
+                Swal.fire('এরর', err.message, 'error');
+            }
+        }
+
+        function renderStudentCard() {
+            if (currentStudentIdx >= activeStudents.length) {
+                document.getElementById('attendanceCardBox').style.display = 'none';
+                document.getElementById('attendanceDoneBox').style.display = 'block';
+                return;
+            }
+
+            const student = activeStudents[currentStudentIdx];
+            document.getElementById('cardRoll').innerText = student.roll_number;
+            document.getElementById('cardName').innerText = student.student_name;
+
+            const progress = ((currentStudentIdx) / activeStudents.length) * 100;
+            document.getElementById('progressBarFill').style.width = `${progress}%`;
+            document.getElementById('attCounter').innerText = `${currentStudentIdx + 1} / ${activeStudents.length}`;
+        }
+
+        async function recordAttendance(status) {
+            const student = activeStudents[currentStudentIdx];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            try {
+                const { error } = await supabase
+                    .from('attendance')
+                    .upsert({
+                        student_id: student.id,
+                        attendance_date: todayStr,
+                        status: status,
+                        marked_by: currentUser.id
+                    }, { onConflict: 'student_id, attendance_date' });
+
+                if (error) throw error;
+
+                currentStudentIdx++;
+                renderStudentCard();
+            } catch (err) {
+                Toast.fire({ icon: 'error', title: 'হাজিরা সেভ হতে সমস্যা: ' + err.message });
+            }
+        }
+
+        function navigateCard(direction) {
+            const nextIndex = currentStudentIdx + direction;
+            if (nextIndex >= 0 && nextIndex < activeStudents.length) {
+                currentStudentIdx = nextIndex;
+                renderStudentCard();
+            }
+        }
+
+        // Modal Management
+        function openManagerModal() {
+            document.getElementById('managerModal').classList.add('active');
+            setModalTab('class');
+        }
+
+        function closeManagerModal() {
+            document.getElementById('managerModal').classList.remove('active');
+            loadTeacherDashboard();
+        }
+
+        function setModalTab(tab) {
+            if (tab === 'class') {
+                document.getElementById('tabAddClass').style.display = 'block';
+                document.getElementById('tabAddStudent').style.display = 'none';
+            } else {
+                document.getElementById('tabAddClass').style.display = 'none';
+                document.getElementById('tabAddStudent').style.display = 'block';
+                populateDropdowns();
+            }
+        }
+
+        async function handleCreateClass(e) {
+            e.preventDefault();
+            const className = document.getElementById('newClassName').value.trim();
+            const sectionName = document.getElementById('newSectionName').value.trim();
+
+            try {
+                const { error } = await supabase
+                    .from('classes')
+                    .insert([{
+                        class_name: className,
+                        section_name: sectionName,
+                        created_by: currentUser.id
+                    }]);
+
+                if (error) throw error;
+
+                Toast.fire({ icon: 'success', title: 'শ্রেণী যুক্ত হয়েছে' });
+                document.getElementById('newClassName').value = '';
+                document.getElementById('newSectionName').value = '';
+                setModalTab('student');
+            } catch (err) {
+                Swal.fire('এরর', 'শ্রেণীটি আগে থেকেই বিদ্যমান বা সমস্যা হচ্ছে।', 'error');
+            }
+        }
+
+        async function handleCreateStudent(e) {
+            e.preventDefault();
+            const classId = document.getElementById('modalStudentClassSelect').value;
+            const roll = parseInt(document.getElementById('newStudentRoll').value);
+            const name = document.getElementById('newStudentName').value.trim();
+
+            if (!classId) return;
+
+            try {
+                const { error } = await supabase
+                    .from('students')
+                    .insert([{
+                        class_id: classId,
+                        roll_number: roll,
+                        student_name: name
+                    }]);
+
+                if (error) throw error;
+
+                Toast.fire({ icon: 'success', title: 'শিক্ষার্থী যুক্ত হয়েছে' });
+                document.getElementById('newStudentRoll').value = '';
+                document.getElementById('newStudentName').value = '';
+                renderModalStudentList();
+            } catch (err) {
+                Swal.fire('এরর', 'একই রোল নম্বর কি আগেই যুক্ত হয়েছে?', 'error');
+            }
+        }
+
+        async function renderModalStudentList() {
+            const classId = document.getElementById('modalStudentClassSelect').value;
+            const container = document.getElementById('modalStudentList');
+
+            if (!classId) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const { data: students } = await supabase
+                .from('students')
+                .select('*')
+                .eq('class_id', classId)
+                .order('roll_number', { ascending: true });
+
+            container.innerHTML = (students || []).map(s => `
+                <div class="student-item">
+                    <span><strong>রোল ${s.roll_number}:</strong> ${s.student_name}</span>
+                    <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="removeStudent(${s.id})">মুছুন</button>
+                </div>
+            `).join('');
+        }
+
+        async function removeStudent(studentId) {
+            if (confirm("আপনি কি এই শিক্ষার্থীকে মুছে ফেলতে চান?")) {
+                await supabase.from('students').delete().eq('id', studentId);
+                renderModalStudentList();
+            }
+        }
+
+        // Head Teacher Reports
+        async function loadHeadTeacherDashboard() {
+            populateDropdowns();
+            loadHeadTeacherReport();
+        }
+
+        async function loadHeadTeacherReport() {
+            const date = document.getElementById('htFilterDate').value;
+            const classId = document.getElementById('htFilterClass').value;
+            const container = document.getElementById('htReportContainer');
+
+            if (!date) return;
+
+            try {
+                let query = supabase
+                    .from('attendance')
+                    .select('*, students!inner(roll_number, student_name, class_id, classes!inner(class_name, section_name))')
+                    .eq('attendance_date', date);
+
+                if (classId) {
+                    query = query.eq('students.class_id', classId);
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--text-muted);">এই তারিখে (${date}) কোনো হাজিরা রেকর্ড পাওয়া যায়নি।</p>`;
+                    return;
+                }
+
+                const presentCount = data.filter(d => d.status === 'Yes').length;
+                const absentCount = data.filter(d => d.status === 'No').length;
+
+                container.innerHTML = `
+                    <div style="display:flex; gap:10px; margin-bottom:1rem;">
+                        <div style="flex:1; background:#d1fae5; padding:12px; border-radius:10px; text-align:center;">
+                            <strong style="color:#065f46;">মোট উপস্থিত: ${presentCount} জন</strong>
+                        </div>
+                        <div style="flex:1; background:#fee2e2; padding:12px; border-radius:10px; text-align:center;">
+                            <strong style="color:#991b1b;">মোট অনুপস্থিত: ${absentCount} জন</strong>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>শ্রেণী</th>
+                                    <th>রোল</th>
+                                    <th>নাম</th>
+                                    <th>স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(item => `
+                                    <tr>
+                                        <td>${item.students.classes.class_name} (${item.students.classes.section_name})</td>
+                                        <td>${item.students.roll_number}</td>
+                                        <td>${item.students.student_name}</td>
+                                        <td>${item.status === 'Yes' ? '<span class="badge badge-yes">উপস্থিত (Yes)</span>' : '<span class="badge badge-no">অনুপস্থিত (No)</span>'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = '<p style="color:red;">রিপোর্ট ফেচ করতে ব্যর্থ হয়েছে।</p>';
+            }
+        }
+
+        // Monthly Summary
+        async function fetchMonthlyReport() {
+            const classId = document.getElementById('monthlyClassSelect').value;
+            const container = document.getElementById('monthlyReportOutput');
+
+            if (!classId) {
+                container.innerHTML = '';
+                return;
+            }
+
+            try {
+                const { data: students } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('class_id', classId)
+                    .order('roll_number', { ascending: true });
+
+                if (!students || students.length === 0) {
+                    container.innerHTML = '<p style="padding: 1rem; text-align:center;">কোনো শিক্ষার্থী পাওয়া যায়নি।</p>';
+                    return;
+                }
+
+                const { data: attRecords } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .in('student_id', students.map(s => s.id));
+
+                container.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>রোল</th>
+                                    <th>নাম</th>
+                                    <th>মোট উপস্থিত</th>
+                                    <th>মোট অনুপস্থিত</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${students.map(s => {
+                                    const studentAtt = (attRecords || []).filter(a => a.student_id === s.id);
+                                    const present = studentAtt.filter(a => a.status === 'Yes').length;
+                                    const absent = studentAtt.filter(a => a.status === 'No').length;
+                                    return `
+                                        <tr>
+                                            <td>${s.roll_number}</td>
+                                            <td>${s.student_name}</td>
+                                            <td style="color: green; font-weight: 700;">${present} দিন</td>
+                                            <td style="color: red; font-weight: 700;">${absent} দিন</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                Swal.fire('এরর', err.message, 'error');
+            }
+        }
+
+        // Student Search
+        async function executeStudentSearch() {
+            const classId = document.getElementById('searchClassSelect').value;
+            const roll = parseInt(document.getElementById('searchRollInput').value);
+            const container = document.getElementById('searchResultsOutput');
+
+            if (!classId || isNaN(roll)) {
+                Swal.fire('ইনপুট এরর', 'শ্রেণী নির্বাচন ও রোল নম্বর সঠিক দিন।', 'warning');
+                return;
+            }
+
+            try {
+                const { data: students, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('class_id', classId)
+                    .eq('roll_number', roll);
+
+                if (error) throw error;
+
+                if (!students || students.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:red; padding: 1rem;">এই রোল নম্বরের কোনো শিক্ষার্থী পাওয়া যায়নি!</p>';
+                    return;
+                }
+
+                const student = students[0];
+
+                const { data: attList } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .eq('student_id', student.id)
+                    .order('attendance_date', { ascending: false });
+
+                container.innerHTML = `
+                    <div style="background: #e0e7ff; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <p><strong>শিক্ষার্থীর নাম:</strong> ${student.student_name}</p>
+                        <p><strong>রোল নম্বর:</strong> ${student.roll_number}</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>তারিখ</th>
+                                    <th>স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(attList || []).map(r => `
+                                    <tr>
+                                        <td>${r.attendance_date}</td>
+                                        <td>${r.status === 'Yes' ? '<span class="badge badge-yes">উপস্থিত</span>' : '<span class="badge badge-no">অনুপস্থিত</span>'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                Swal.fire('এরর', err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
